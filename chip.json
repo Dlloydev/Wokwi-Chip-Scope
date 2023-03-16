@@ -1,0 +1,54 @@
+{
+  "name": "Scope",
+  "author": "David Lloyd",
+  "license": "MIT",
+  "docs": "https://github.com/Dlloydev/Wokwi-Chip-Scope/blob/main/docs/README.md",
+  "pins": [
+    "D0",
+    "D1",
+    "D2",
+    "D3",
+    "A3",
+    "A2",
+    "A1",
+    "A0"
+  ],
+  "display": {
+    "width": 252,
+    "height": 168
+  },
+  "controls": [
+    {
+      "id": "sampleTimeUs",
+      "label": "Sample Time (μs)",
+      "type": "range",
+      "min": 0,
+      "max": 400,
+      "step": 10
+    },    {
+      "id": "sampleTimeMs",
+      "label": "Sample Time (ms)",
+      "type": "range",
+      "min": 0,
+      "max": 40,
+      "step": 1
+    },
+    {
+      "id": "triggerChannel",
+      "label": "Trigger Channel",
+      "type": "range",
+      "min": 0,
+      "max": 3,
+      "step": 1
+    },
+      {
+      "id": "triggerMode",
+      "label": ".🇴┈┈┈┈┈┈⬆️┈┈┈┈┈┈⬇️",
+      "type": "range",
+      "min": 0,
+      "max": 2,
+      "step": 1
+    }
+  ]
+}
+

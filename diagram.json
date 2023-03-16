@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "author": "David Lloyd",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "chip-scope",
+      "id": "chip-scope1",
+      "top": -565.38,
+      "left": 43.2,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr1",
+      "top": -505.6,
+      "left": -181.6,
+      "attrs": {}
+    },
+    { "type": "wokwi-gnd", "id": "gnd1", "top": -441.6, "left": -0.6, "attrs": {} },
+    {
+      "type": "wokwi-clock-generator",
+      "id": "clkgen2",
+      "top": -652.8,
+      "left": -249.6,
+      "attrs": {}
+    },
+    { "type": "wokwi-flip-flop-d", "id": "flipflop1", "top": -662.4, "left": -163.2, "attrs": {} },
+    { "type": "wokwi-flip-flop-d", "id": "flipflop2", "top": -662.4, "left": -38.4, "attrs": {} },
+    { "type": "wokwi-flip-flop-d", "id": "flipflop3", "top": -662.4, "left": 86.4, "attrs": {} },
+    { "type": "wokwi-flip-flop-d", "id": "flipflop4", "top": -662.4, "left": 211.2, "attrs": {} },
+    { "type": "wokwi-flip-flop-d", "id": "flipflop5", "top": -662.4, "left": 336, "attrs": {} },
+    {
+      "type": "wokwi-slide-potentiometer",
+      "id": "pot1",
+      "top": -590.2,
+      "left": 325.4,
+      "attrs": { "travelLength": "30" }
+    }
+  ],
+  "connections": [
+    [ "ldr1:GND", "gnd1:GND", "black", [ "h19.2", "v38" ] ],
+    [ "chip-plot3-1:A0", "ldr1:AO", "green", [ "h-25.67", "v88.7" ] ],
+    [ "clkgen2:CLK", "flipflop1:CLK", "purple", [ "v0" ] ],
+    [ "flipflop1:Q", "flipflop2:CLK", "purple", [ "v0", "h9.6", "v19.2" ] ],
+    [ "flipflop2:Q", "flipflop3:CLK", "purple", [ "v0", "h9.6", "v19.2" ] ],
+    [ "flipflop3:Q", "flipflop4:CLK", "purple", [ "v0", "h9.6", "v19.2" ] ],
+    [ "flipflop4:Q", "flipflop5:CLK", "purple", [ "v0", "h9.6", "v19.2" ] ],
+    [ "flipflop1:NOTQ", "flipflop1:D", "purple", [ "h0", "v19.2", "h-105.6", "v-28.8" ] ],
+    [ "flipflop2:NOTQ", "flipflop2:D", "purple", [ "h0", "v19.2", "h-105.6", "v-38.4" ] ],
+    [ "flipflop3:NOTQ", "flipflop3:D", "purple", [ "h0", "v19.2", "h-105.6", "v-28.8" ] ],
+    [ "flipflop4:NOTQ", "flipflop4:D", "purple", [ "h0", "v19.2", "h-105.6", "v-38.4" ] ],
+    [ "flipflop5:NOTQ", "flipflop5:D", "purple", [ "h9.6", "v28.8", "h-115.2", "v-48" ] ],
+    [ "ldr1:DO", "chip-scope1:D2", "green", [ "h28.8", "v-48.6" ] ],
+    [ "chip-scope1:D1", "flipflop5:Q", "green", [ "h-38.4", "v-48", "h441.6", "v-9.6" ] ],
+    [
+      "chip-scope1:D0",
+      "flipflop4:Q",
+      "green",
+      [ "h-28.8", "v-28.8", "h297.6", "v-67.2" ]
+    ]
+  ],
+  "dependencies": { "chip-scope": "github:Dlloydev/Wokwi-Chip-Scope@1.0.0" }
+}
