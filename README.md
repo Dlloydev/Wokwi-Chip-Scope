@@ -19,7 +19,7 @@ This 4 channel scope chip allows you to graph four analog or digital signals as 
 
 
 
-![image](https://user-images.githubusercontent.com/63488701/225514429-6fb7f9e2-90ab-4ad2-bad7-86c1d0b3c08f.png)
+![image](https://user-images.githubusercontent.com/63488701/225989409-f13bb610-c9eb-4df7-a969-b8c1cd27d1c5.png)
 
 | Name           | Description                                       |
 | -------------- | ------------------------------------------------- |
