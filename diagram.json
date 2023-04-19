@@ -5,10 +5,15 @@
   "parts": [
     {
       "type": "chip-scope",
-      "id": "chip-scope1",
-      "top": -565.38,
+      "id": "scope1",
+      "top": -564.74,
       "left": 43.2,
-      "attrs": {}
+      "attrs": {
+        "mySampleTimeUs": "100",
+        "mySampleTimeMs": "0",
+        "myTriggerChannel": "0",
+        "myTriggerMode": "1"
+      }
     },
     {
       "type": "wokwi-photoresistor-sensor",
@@ -33,14 +38,13 @@
     {
       "type": "wokwi-slide-potentiometer",
       "id": "pot1",
-      "top": -590.2,
+      "top": -609.4,
       "left": 325.4,
       "attrs": { "travelLength": "30" }
     }
   ],
   "connections": [
     [ "ldr1:GND", "gnd1:GND", "black", [ "h19.2", "v38" ] ],
-    [ "chip-plot3-1:A0", "ldr1:AO", "green", [ "h-25.67", "v88.7" ] ],
     [ "clkgen2:CLK", "flipflop1:CLK", "purple", [ "v0" ] ],
     [ "flipflop1:Q", "flipflop2:CLK", "purple", [ "v0", "h9.6", "v19.2" ] ],
     [ "flipflop2:Q", "flipflop3:CLK", "purple", [ "v0", "h9.6", "v19.2" ] ],
@@ -51,14 +55,11 @@
     [ "flipflop3:NOTQ", "flipflop3:D", "purple", [ "h0", "v19.2", "h-105.6", "v-28.8" ] ],
     [ "flipflop4:NOTQ", "flipflop4:D", "purple", [ "h0", "v19.2", "h-105.6", "v-38.4" ] ],
     [ "flipflop5:NOTQ", "flipflop5:D", "purple", [ "h9.6", "v28.8", "h-115.2", "v-48" ] ],
-    [ "ldr1:DO", "chip-scope1:D2", "green", [ "h28.8", "v-48.6" ] ],
-    [ "chip-scope1:D1", "flipflop5:Q", "green", [ "h-38.4", "v-48", "h441.6", "v-9.6" ] ],
-    [
-      "chip-scope1:D0",
-      "flipflop4:Q",
-      "green",
-      [ "h-28.8", "v-28.8", "h297.6", "v-67.2" ]
-    ]
+    [ "ldr1:DO", "scope1:D2", "green", [ "h28.8", "v-48.6" ] ],
+    [ "scope1:D1", "flipflop5:Q", "green", [ "h-38.4", "v-48", "h441.6", "v-9.6" ] ],
+    [ "scope1:D0", "flipflop4:Q", "green", [ "h-28.8", "v-28.8", "h297.6", "v-67.2" ] ],
+    [ "ldr1:AO", "scope1:A3", "green", [ "h39.45", "v122.38", "h284.03", "v-190.28" ] ],
+    [ "scope1:A1", "pot1:SIG", "green", [ "h18.84", "v9.6" ] ]
   ],
-  "dependencies": { "chip-scope": "github:Dlloydev/Wokwi-Chip-Scope@1.0.0" }
+  "dependencies": { "chip-scope": "github:Dlloydev/Wokwi-Chip-Scope@1.0.2" }
 }

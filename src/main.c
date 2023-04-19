@@ -1,4 +1,4 @@
-// Digital Plot3 Chip
+// Scope Chip v1.0.2
 // by David Lloyd, March 2023.
 
 #include "wokwi-api.h"
@@ -157,12 +157,16 @@ typedef struct {
   pin_t pin_A2;
   pin_t pin_A3;
 
+  uint32_t mySampleTimeUs;
   uint32_t sampleTimeUs_attr;
   uint32_t sampleTimeUs;
+  uint32_t mySampleTimeMs;
   uint32_t sampleTimeMs_attr;
   uint32_t sampleTimeMs;
+  uint32_t myTriggerChannel;
   uint32_t triggerChannel_attr;
   uint32_t triggerChannel;
+  uint32_t myTriggerMode;
   uint32_t triggerMode_attr;
   uint32_t triggerMode;
 
@@ -244,15 +248,25 @@ void chip_init(void) {
   chip->pin_A2 = pin_init("A2", ANALOG);
   chip->pin_A3 = pin_init("A3", ANALOG);
 
-  chip->sampleTimeUs_attr = attr_init("sampleTimeUs", 100);
-  chip->sampleTimeMs_attr = attr_init("sampleTimeMs", 0);
-  chip->triggerChannel_attr = attr_init("triggerChannel", 0);
-  chip->triggerMode_attr = attr_init("triggerMode", 1);
+  chip->mySampleTimeUs = attr_init("mySampleTimeUs", 0);
+  chip->sampleTimeUs = attr_read(chip->mySampleTimeUs);
+  if (chip->sampleTimeUs > 400) chip->sampleTimeUs = 400;
+  chip->sampleTimeUs_attr = attr_init("sampleTimeUs", chip->sampleTimeUs);
+ 
+  chip->mySampleTimeMs = attr_init("mySampleTimeMs", 0);
+  chip->sampleTimeMs = attr_read(chip->mySampleTimeMs);
+  if (chip->sampleTimeMs > 40) chip->sampleTimeMs = 40;
+  chip->sampleTimeMs_attr = attr_init("sampleTimeMs", chip->sampleTimeMs);
 
-  uint32_t sampleTimeUs = chip->sampleTimeUs_attr;
-  uint32_t sampleTimeMs = chip->sampleTimeMs_attr;
-  uint32_t triggerChannel = chip->triggerChannel_attr;
-  uint32_t triggerMode = chip->triggerMode_attr;
+  chip->myTriggerChannel = attr_init("myTriggerChannel", 0);
+  chip->triggerChannel = attr_read(chip->myTriggerChannel);
+  if (chip->triggerChannel > 3) chip->triggerChannel = 3;
+  chip->triggerChannel_attr = attr_init("triggerChannel", chip->triggerChannel);
+
+  chip->myTriggerMode = attr_init("myTriggerMode", 0);
+  chip->triggerMode = attr_read(chip->myTriggerMode);
+  if (chip->triggerMode > 2) chip->triggerMode = 2;
+  chip->triggerMode_attr = attr_init("triggerMode", chip->triggerMode);
 
   chip->white = (rgba_t) {
     .r = 0xff, .g = 0xff, .b = 0xff, .a = 0xff
@@ -279,11 +293,14 @@ void chip_init(void) {
   printf("Framebuffer: width=%d, height=%d\n", chip->fb_w, chip->fb_h);
   chip->plot_h = chip->fb_h - chip->serial_h;
 
-  chip->sampleTimeUs = attr_read(chip->sampleTimeUs_attr);
-  chip->sampleMs = attr_read(chip->sampleTimeMs_attr);
-
   chip->samplePeriod = chip->sampleTimeUs + (chip->sampleMs * 1000);
   chip->captureMs = ((chip->fb_w - 2) * chip->sampleTimeUs) / 1000;
+
+  // have chip_timer_event() read control attributes on first run 
+  chip->sampleTimeUs = (chip->sampleTimeUs > 0) ? chip->sampleTimeUs - 1 : chip->sampleTimeUs + 1;
+  chip->sampleTimeMs = (chip->sampleTimeMs > 0) ? chip->sampleTimeMs - 1 : chip->sampleTimeMs + 1;
+  chip->triggerChannel = (chip->triggerChannel > 0) ? chip->triggerChannel - 1 : chip->triggerChannel + 1;
+  chip->triggerMode = (chip->triggerMode > 0) ? chip->triggerMode - 1 : chip->triggerMode + 1;
 
   fill_string(chip);
   fill_plot(chip);

@@ -5,17 +5,33 @@
 This 4 channel scope chip allows you to graph four analog or digital signals as they vary over time.
 
 - Scope `Sample Time μs` range is 10µs to 10000 ms (default 100 µs).
--  Width of plot is 250 samples.
--  Trigger Channel selector (0-3) for analog or digital signals, default 0
+
+- Width of plot is 250 samples.
+
+- Trigger Channel selector (0-3) for analog or digital signals, default 0
+
 - `Trigger` modes are Off (`0`) Rising (default) ⬆ and Falling ⬇
+
 - Displays analog volts`Vmax`, and volts `Vmin`
+
 - Displays  Sample Raye `S/s` and Capture Time `ms`
+
 - Displays Trigger Channel selection `>`
+
 - Displays Frequency Hz and Duty of digital signals 
 
+- Default control settings can be changed in `diagram.json` 
 
+  ```json
+        "attrs": {
+          "mySampleTimeUs": "100",
+          "mySampleTimeMs": "0",
+          "myTriggerChannel": "0",
+          "myTriggerMode": "1"
+        }
+  ```
 
-![image](https://user-images.githubusercontent.com/63488701/225511219-88cb7d44-6541-4598-9401-b627d5cc918f.png)
+  ![image](https://user-images.githubusercontent.com/63488701/225511219-88cb7d44-6541-4598-9401-b627d5cc918f.png)
 
 
 
@@ -38,7 +54,7 @@ To use this chip in your project, include it as a dependency in your `diagram.js
 
 ```json
   "dependencies": {
-    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.0"
+    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.2"
   }
 ```
 
@@ -47,8 +63,18 @@ Then, add the chip to your circuit by adding a `chip-scope` item to the `parts` 
 ```json
   "parts": {
     ...,
-    { "type": "chip-scope", "id": "chip-scope1" }
-  },
+    {
+      "type": "chip-scope",
+      "id": "scope1",
+      "top": -100.0,
+      "left": 100.0,
+      "attrs": {
+        "mySampleTimeUs": "100",
+        "mySampleTimeMs": "0",
+        "myTriggerChannel": "0",
+        "myTriggerMode": "1"
+      }
+    },
 ```
 
 The actual source code for the chip lives in [src/main.c](https://github.com/Dlloydev/Wokwi-Chip-Scope/blob/main/src/main.c), and the pins are described in [chip.json](https://github.com/Dlloydev/Wokwi-Chip-Scope/blob/main/chip.json).
