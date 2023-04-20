@@ -1,4 +1,4 @@
-// Scope Chip v1.0.2
+// Scope Chip v1.0.3
 // by David Lloyd, March 2023.
 
 #include "wokwi-api.h"
@@ -453,6 +453,7 @@ uint32_t draw_ch(chip_state_t *chip, uint32_t y_base, uint32_t y_height, float y
              (chip->plot_x == chip->fb_w - 1) ||
              (chip->plot_x == 0)) ? chip->background : chip->green;
     buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + (chip->plot_x * 4), &color, sizeof(color));
+    if(chip->plot_x + 8 < chip->fb_w && chip->sampleMs) buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + ((chip->plot_x + 8) * 4), &chip->background, sizeof(color));
   }
   return plot_y;
 }
@@ -487,50 +488,43 @@ void calc_hz_duty(chip_state_t *chip) {
   static uint32_t t0, t1, t2, t3;
   static uint32_t tt0, tt1, tt2, tt3;
 
-  if (chip->triggerChannel != 0 || (chip->plot_x == 0)) t0 = tt0 = 0;
-  if (chip->triggerChannel != 1 || (chip->plot_x == 0)) t1 = tt1 = 0;
-  if (chip->triggerChannel != 2 || (chip->plot_x == 0)) t2 = tt2 = 0;
-  if (chip->triggerChannel != 3 || (chip->plot_x == 0)) t3 = tt3 = 0;
-
-  if (chip->triggerChannel == 0) {
-    if (chip->triggerMode == 1 && chip->plot_py0 > ppy0 && t0 == 0 && tt0 == 0) t0 = chip->plot_x;
-    else if (chip->triggerMode == 1 && chip->plot_py0 < ppy0 && t0 > 0 && tt0 == 0) tt0 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py0 < ppy0 && t0 == 0 && tt0 == 0) t0 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py0 > ppy0 && t0 > 0 && tt0 == 0) tt0 = chip->plot_x;
-    if (t0 > 0 && tt0 > 0) period0 = tt0;
-    if (period0 > 0) chip->hz0 = 1000000 / (chip->samplePeriod * period0);
-    if (t0 > 0 && tt0 > 0 && period0 > 0) chip->dc0 = (chip->triggerMode == 2) ? ((tt0 - t0) * 100) / period0 : (t0 * 100) / period0;
+  if (chip->plot_x == 0) {
+    t0 = tt0 = 0;
+    t1 = tt1 = 0;
+    t2 = tt2 = 0;
+    t3 = tt3 = 0;
   }
+  if (chip->triggerMode == 1 && chip->plot_py0 > ppy0 && t0 == 0 && tt0 == 0) t0 = chip->plot_x;
+  else if (chip->triggerMode == 1 && chip->plot_py0 < ppy0 && t0 > 0 && tt0 == 0) tt0 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py0 < ppy0 && t0 == 0 && tt0 == 0) t0 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py0 > ppy0 && t0 > 0 && tt0 == 0) tt0 = chip->plot_x;
+  if (t0 > 0 && tt0 > 0) period0 = tt0;
+  if (period0 > 0) chip->hz0 = 1000000 / (chip->samplePeriod * period0);
+  if (t0 > 0 && tt0 > 0 && period0 > 0) chip->dc0 = (chip->triggerMode == 2) ? ((tt0 - t0) * 100) / period0 : (t0 * 100) / period0;
 
-  else if (chip->triggerChannel == 1) {
-    if (chip->triggerMode == 1 && chip->plot_py1 > ppy1 && t1 == 0 && tt1 == 0) t1 = chip->plot_x;
-    else if (chip->triggerMode == 1 && chip->plot_py1 < ppy1 && t1 > 0 && tt1 == 0) tt1 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py1 < ppy1 && t1 == 0 && tt1 == 0) t1 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py1 > ppy1 && t1 > 0 && tt1 == 0) tt1 = chip->plot_x;
-    if (t1 > 0 && tt1 > 0) period1 = tt1;
-    if (period1 > 0) chip->hz1 = 1000000 / (chip->samplePeriod * period1);
-    if (t1 > 0 && tt1 > 0 && period1 > 0) chip->dc1 = (chip->triggerMode == 2) ? ((tt1 - t1) * 100) / period1 : (t1 * 100) / period1;
-  }
+  if (chip->triggerMode == 1 && chip->plot_py1 > ppy1 && t1 == 0 && tt1 == 0) t1 = chip->plot_x;
+  else if (chip->triggerMode == 1 && chip->plot_py1 < ppy1 && t1 > 0 && tt1 == 0) tt1 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py1 < ppy1 && t1 == 0 && tt1 == 0) t1 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py1 > ppy1 && t1 > 0 && tt1 == 0) tt1 = chip->plot_x;
+  if (t1 > 0 && tt1 > 0) period1 = tt1;
+  if (period1 > 0) chip->hz1 = 1000000 / (chip->samplePeriod * period1);
+  if (t1 > 0 && tt1 > 0 && period1 > 0) chip->dc1 = (chip->triggerMode == 2) ? ((tt1 - t1) * 100) / period1 : (t1 * 100) / period1;
 
-  else if (chip->triggerChannel == 2) {
-    if (chip->triggerMode == 1 && chip->plot_py2 > ppy2 && t2 == 0 && tt2 == 0) t2 = chip->plot_x;
-    else if (chip->triggerMode == 1 && chip->plot_py2 < ppy2 && t2 > 0 && tt2 == 0) tt2 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py2 < ppy2 && t2 == 0 && tt2 == 0) t2 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py2 > ppy2 && t2 > 0 && tt2 == 0) tt2 = chip->plot_x;
-    if (t2 > 0 && tt2 > 0) period2 = tt2;
-    if (period2 > 0) chip->hz2 = 1000000 / (chip->samplePeriod * period2);
-    if (t2 > 0 && tt2 > 0 && period2 > 0) chip->dc2 = (chip->triggerMode == 2) ? ((tt2 - t2) * 100) / period2 : (t2 * 100) / period2;
-  }
+  if (chip->triggerMode == 1 && chip->plot_py2 > ppy2 && t2 == 0 && tt2 == 0) t2 = chip->plot_x;
+  else if (chip->triggerMode == 1 && chip->plot_py2 < ppy2 && t2 > 0 && tt2 == 0) tt2 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py2 < ppy2 && t2 == 0 && tt2 == 0) t2 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py2 > ppy2 && t2 > 0 && tt2 == 0) tt2 = chip->plot_x;
+  if (t2 > 0 && tt2 > 0) period2 = tt2;
+  if (period2 > 0) chip->hz2 = 1000000 / (chip->samplePeriod * period2);
+  if (t2 > 0 && tt2 > 0 && period2 > 0) chip->dc2 = (chip->triggerMode == 2) ? ((tt2 - t2) * 100) / period2 : (t2 * 100) / period2;
 
-  else if (chip->triggerChannel == 3) {
-    if (chip->triggerMode == 1 && chip->plot_py3 > ppy3 && t3 == 0 && tt3 == 0) t3 = chip->plot_x;
-    else if (chip->triggerMode == 1 && chip->plot_py3 < ppy3 && t3 > 0 && tt3 == 0) tt3 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py3 < ppy3 && t3 == 0 && tt3 == 0) t3 = chip->plot_x;
-    else if (chip->triggerMode == 2 && chip->plot_py3 > ppy3 && t3 > 0 && tt3 == 0) tt3 = chip->plot_x;
-    if (t3 > 0 && tt3 > 0) period3 = tt3;
-    if (period3 > 0) chip->hz3 = 1000000 / (chip->samplePeriod * period3);
-    if (t3 > 0 && tt3 > 0 && period3 > 0) chip->dc3 = (chip->triggerMode == 2) ? ((tt3 - t3) * 100) / period3 : (t3 * 100) / period3;
-  }
+  if (chip->triggerMode == 1 && chip->plot_py3 > ppy3 && t3 == 0 && tt3 == 0) t3 = chip->plot_x;
+  else if (chip->triggerMode == 1 && chip->plot_py3 < ppy3 && t3 > 0 && tt3 == 0) tt3 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py3 < ppy3 && t3 == 0 && tt3 == 0) t3 = chip->plot_x;
+  else if (chip->triggerMode == 2 && chip->plot_py3 > ppy3 && t3 > 0 && tt3 == 0) tt3 = chip->plot_x;
+  if (t3 > 0 && tt3 > 0) period3 = tt3;
+  if (period3 > 0) chip->hz3 = 1000000 / (chip->samplePeriod * period3);
+  if (t3 > 0 && tt3 > 0 && period3 > 0) chip->dc3 = (chip->triggerMode == 2) ? ((tt3 - t3) * 100) / period3 : (t3 * 100) / period3;
 
   ppy0 = chip->plot_py0;
   ppy1 = chip->plot_py1;

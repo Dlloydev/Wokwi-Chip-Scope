@@ -20,7 +20,7 @@ This 4 channel scope chip allows you to graph four analog or digital signals as 
 
 - Displays Frequency Hz and Duty of digital signals 
 
-- Default control settings can be changed in `diagram.json` 
+- Default control settings (below) can be changed in `diagram.json` 
 
   ```json
         "attrs": {
@@ -54,7 +54,7 @@ To use this chip in your project, include it as a dependency in your `diagram.js
 
 ```json
   "dependencies": {
-    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.2"
+    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.3"
   }
 ```
 
