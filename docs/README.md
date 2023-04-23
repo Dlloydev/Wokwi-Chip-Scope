@@ -54,7 +54,7 @@ To use this chip in your project, include it as a dependency in your `diagram.js
 
 ```json
   "dependencies": {
-    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.3"
+    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.4"
   }
 ```
 
