@@ -19,14 +19,14 @@
   },
   "controls": [
     {
-      "id": "sampleTimeUs",
+      "id": "SampleTimeUs",
       "label": "Sample Time (μs)",
       "type": "range",
       "min": 0,
       "max": 400,
       "step": 10
     },    {
-      "id": "sampleTimeMs",
+      "id": "SampleTimeMs",
       "label": "Sample Time (ms)",
       "type": "range",
       "min": 0,
@@ -34,7 +34,7 @@
       "step": 1
     },
     {
-      "id": "triggerChannel",
+      "id": "TriggerChannel",
       "label": "Trigger Channel",
       "type": "range",
       "min": 0,
@@ -42,7 +42,7 @@
       "step": 1
     },
       {
-      "id": "triggerMode",
+      "id": "TriggerMode",
       "label": ".🇴┈┈┈┈┈┈⬆️┈┈┈┈┈┈⬇️",
       "type": "range",
       "min": 0,
@@ -51,4 +51,3 @@
     }
   ]
 }
-

@@ -1,4 +1,4 @@
-// Scope Chip v1.0.5
+// Scope Chip v1.0.6
 // by David Lloyd, March 2023.
 
 #include "wokwi-api.h"
