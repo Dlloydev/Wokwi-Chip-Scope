@@ -9,10 +9,15 @@
       "top": -564.74,
       "left": 43.2,
       "attrs": {
-        "mySampleTimeUs": "100",
-        "mySampleTimeMs": "0",
-        "myTriggerChannel": "0",
-        "myTriggerMode": "1"
+        "sampleTimeUs": "100",
+        "sampleTimeMs": "0",
+        "triggerChannel": "0",
+        "triggerMode": "1",
+        "crtColor": "2",
+        "trace0Color": "14",
+        "trace1Color": "12",
+        "trace2Color": "10",
+        "trace3Color": "2"
       }
     },
     {
@@ -61,5 +66,5 @@
     [ "ldr1:AO", "scope1:A3", "green", [ "h39.45", "v122.38", "h284.03", "v-190.28" ] ],
     [ "scope1:A1", "pot1:SIG", "green", [ "h18.84", "v9.6" ] ]
   ],
-  "dependencies": { "chip-scope": "github:Dlloydev/Wokwi-Chip-Scope@1.0.4" }
+  "dependencies": { "chip-scope": "github:Dlloydev/Wokwi-Chip-Scope@1.0.5" }
 }

@@ -1,4 +1,4 @@
-// Scope Chip v1.0.4
+// Scope Chip v1.0.5
 // by David Lloyd, March 2023.
 
 #include "wokwi-api.h"
@@ -157,18 +157,21 @@ typedef struct {
   pin_t pin_A2;
   pin_t pin_A3;
 
-  uint32_t mySampleTimeUs;
-  uint32_t sampleTimeUs_attr;
+  uint32_t SampleTimeUs_attr; // control
+  uint32_t sampleTimeUs_attr; // diagram.json
   uint32_t sampleTimeUs;
-  uint32_t mySampleTimeMs;
+  uint32_t SampleTimeMs_attr;
   uint32_t sampleTimeMs_attr;
   uint32_t sampleTimeMs;
-  uint32_t myTriggerChannel;
+  uint32_t TriggerChannel_attr;
   uint32_t triggerChannel_attr;
   uint32_t triggerChannel;
-  uint32_t myTriggerMode;
+  uint32_t TriggerMode_attr;
   uint32_t triggerMode_attr;
   uint32_t triggerMode;
+  uint32_t crt_attr, crtColor;
+  uint32_t trace0_attr, trace1_attr, trace2_attr, trace3_attr;
+  uint32_t trace0Color, trace1Color, trace2Color, trace3Color;
 
   buffer_t framebuffer;
   uint32_t fb_w;
@@ -222,11 +225,12 @@ typedef struct {
   uint32_t plot_py2;
   uint32_t plot_y3;
   uint32_t plot_py3;
-  rgba_t white;
-  rgba_t green;
-  rgba_t background;
+  rgba_t crt, whiteGray, darkGreen, deepGreen, darkBlue, chipGreen;
+  rgba_t trace, trace0, trace1, trace2, trace3;
+  rgba_t black, brown, red, orange, gold, green, blue, violet, gray, white, cyan, limeGreen, magenta, purple, yellow;
   timer_t timer;
   uint32_t timerCount;
+  bool firstRun;
 } chip_state_t;
 
 static void chip_timer_event(void *user_data);
@@ -247,36 +251,84 @@ void chip_init(void) {
   chip->pin_A1 = pin_init("A1", ANALOG);
   chip->pin_A2 = pin_init("A2", ANALOG);
   chip->pin_A3 = pin_init("A3", ANALOG);
+  chip->firstRun = true;
 
-  chip->mySampleTimeUs = attr_init("mySampleTimeUs", 0);
-  chip->sampleTimeUs = attr_read(chip->mySampleTimeUs);
+  chip->black =     (rgba_t) {.r = 0x00, .g = 0x00, .b = 0x00, .a = 0xff};
+  chip->whiteGray = (rgba_t) {.r = 0xf7, .g = 0xf7, .b = 0xf7, .a = 0xff};
+  chip->chipGreen = (rgba_t) {.r = 0x08, .g = 0x7f, .b = 0x45, .a = 0xdf};
+  chip->darkGreen = (rgba_t) {.r = 0x02, .g = 0x30, .b = 0x20, .a = 0xff};
+  chip->deepGreen = (rgba_t) {.r = 0x29, .g = 0x52, .b = 0x40, .a = 0xff};
+  chip->darkBlue =  (rgba_t) {.r = 0x03, .g = 0x25, .b = 0x4c, .a = 0xff};
+  
+  chip->black =     (rgba_t) {.r = 0x00, .g = 0x00, .b = 0x00, .a = 0xff};
+  chip->brown =     (rgba_t) {.r = 0x8f, .g = 0x48, .b = 0x14, .a = 0xff};
+  chip->red =       (rgba_t) {.r = 0xff, .g = 0x00, .b = 0x00, .a = 0xff};
+  chip->orange =    (rgba_t) {.r = 0xff, .g = 0xa5, .b = 0x00, .a = 0xff};
+  chip->gold =      (rgba_t) {.r = 0xff, .g = 0xd7, .b = 0x00, .a = 0xff};
+  chip->green =     (rgba_t) {.r = 0x00, .g = 0xa0, .b = 0x00, .a = 0xff};
+  chip->blue =      (rgba_t) {.r = 0x00, .g = 0x00, .b = 0xff, .a = 0xff};
+  chip->violet =    (rgba_t) {.r = 0xee, .g = 0x82, .b = 0xee, .a = 0xff};
+  chip->gray =      (rgba_t) {.r = 0x80, .g = 0x80, .b = 0x80, .a = 0xff};
+  chip->white =     (rgba_t) {.r = 0xff, .g = 0xff, .b = 0xff, .a = 0xff};
+  chip->cyan =      (rgba_t) {.r = 0x00, .g = 0xff, .b = 0xff, .a = 0xff};
+  chip->limeGreen = (rgba_t) {.r = 0x32, .g = 0xcd, .b = 0x32, .a = 0xff};
+  chip->magenta =   (rgba_t) {.r = 0xff, .g = 0x00, .b = 0xff, .a = 0xff};
+  chip->purple =    (rgba_t) {.r = 0x80, .g = 0x00, .b = 0x80, .a = 0xff};
+  chip->yellow =    (rgba_t) {.r = 0xff, .g = 0xff, .b = 0x00, .a = 0xff};
+
+  rgba_t traceColors[15] = {chip->black, chip->brown, chip->red, chip->orange, chip->gold,
+                            chip->green, chip->blue, chip->violet, chip->gray, chip->white,
+                            chip->cyan, chip->limeGreen, chip->magenta, chip->purple, chip->yellow
+                           };
+
+  chip->crt_attr = attr_init("crtColor", 0);
+  chip->crtColor = attr_read(chip->crt_attr);
+  if (chip->crtColor > 4) chip->crtColor = 4;
+  if (chip->crtColor == 0) chip->crt = chip->black; 
+  else if (chip->crtColor == 1) chip->crt = chip->whiteGray;
+  else if (chip->crtColor == 2) chip->crt = chip->darkGreen;
+  else if (chip->crtColor == 3) chip->crt = chip->deepGreen;
+  else if (chip->crtColor == 4) chip->crt = chip->darkBlue;
+
+  chip->trace0_attr = attr_init("trace0Color", 0);
+  chip->trace0Color = attr_read(chip->trace0_attr);
+  if (chip->trace0Color > 14) chip->trace0Color = 14;
+  chip->trace0 = traceColors[chip->trace0Color];
+
+  chip->trace1_attr = attr_init("trace1Color", 0);
+  chip->trace1Color = attr_read(chip->trace1_attr);
+  if (chip->trace1Color > 14) chip->trace1Color = 14;
+  chip->trace1 = traceColors[chip->trace1Color];
+
+  chip->trace2_attr = attr_init("trace2Color", 0);
+  chip->trace2Color = attr_read(chip->trace2_attr);
+  if (chip->trace2Color > 14) chip->trace2Color = 14;
+  chip->trace2 = traceColors[chip->trace2Color];
+
+  chip->trace3_attr = attr_init("trace3Color", 0);
+  chip->trace3Color = attr_read(chip->trace3_attr);
+  if (chip->trace3Color > 14) chip->trace3Color = 14;
+  chip->trace3 = traceColors[chip->trace3Color];
+
+   chip->sampleTimeUs_attr = attr_init("sampleTimeUs", 0);
+  chip->sampleTimeUs = attr_read(chip->sampleTimeUs_attr);
   if (chip->sampleTimeUs > 400) chip->sampleTimeUs = 400;
-  chip->sampleTimeUs_attr = attr_init("sampleTimeUs", chip->sampleTimeUs);
+  chip->SampleTimeUs_attr = attr_init("SampleTimeUs", chip->sampleTimeUs);
 
-  chip->mySampleTimeMs = attr_init("mySampleTimeMs", 0);
-  chip->sampleTimeMs = attr_read(chip->mySampleTimeMs);
+  chip->sampleTimeMs_attr = attr_init("sampleTimeMs", 0);
+  chip->sampleTimeMs = attr_read(chip->sampleTimeMs_attr);
   if (chip->sampleTimeMs > 40) chip->sampleTimeMs = 40;
-  chip->sampleTimeMs_attr = attr_init("sampleTimeMs", chip->sampleTimeMs);
+  chip->SampleTimeMs_attr = attr_init("SampleTimeMs", chip->sampleTimeMs);
 
-  chip->myTriggerChannel = attr_init("myTriggerChannel", 0);
-  chip->triggerChannel = attr_read(chip->myTriggerChannel);
+  chip->triggerChannel_attr = attr_init("triggerChannel", 0);
+  chip->triggerChannel = attr_read(chip->triggerChannel_attr);
   if (chip->triggerChannel > 3) chip->triggerChannel = 3;
-  chip->triggerChannel_attr = attr_init("triggerChannel", chip->triggerChannel);
+  chip->TriggerChannel_attr = attr_init("TriggerChannel", chip->triggerChannel);
 
-  chip->myTriggerMode = attr_init("myTriggerMode", 0);
-  chip->triggerMode = attr_read(chip->myTriggerMode);
+  chip->triggerMode_attr = attr_init("triggerMode", 0);
+  chip->triggerMode = attr_read(chip->triggerMode_attr);
   if (chip->triggerMode > 2) chip->triggerMode = 2;
-  chip->triggerMode_attr = attr_init("triggerMode", chip->triggerMode);
-
-  chip->white = (rgba_t) {
-    .r = 0xff, .g = 0xff, .b = 0xff, .a = 0xff
-  };
-  chip->green = (rgba_t) {
-    .r = 0x08, .g = 0x7f, .b = 0x45, .a = 0xdf
-  };
-  chip->background = (rgba_t) {
-    .r = 0xf7, .g = 0xf7, .b = 0xf7, .a = 0xff
-  };
+  chip->TriggerMode_attr = attr_init("TriggerMode", chip->triggerMode);
 
   chip->sampleMax0 = 0.0;
   chip->sampleMin0 = 5.0;
@@ -294,12 +346,6 @@ void chip_init(void) {
 
   chip->samplePeriod = chip->sampleTimeUs + (chip->sampleMs * 1000);
   chip->captureMs = ((chip->fb_w - 2) * chip->sampleTimeUs) / 1000;
-
-  // have chip_timer_event() read control attributes on first run
-  chip->sampleTimeUs = (chip->sampleTimeUs > 0) ? chip->sampleTimeUs - 1 : chip->sampleTimeUs + 1;
-  chip->sampleTimeMs = (chip->sampleTimeMs > 0) ? chip->sampleTimeMs - 1 : chip->sampleTimeMs + 1;
-  chip->triggerChannel = (chip->triggerChannel > 0) ? chip->triggerChannel - 1 : chip->triggerChannel + 1;
-  chip->triggerMode = (chip->triggerMode > 0) ? chip->triggerMode - 1 : chip->triggerMode + 1;
 
   fill_string(chip);
   fill_plot(chip);
@@ -393,21 +439,28 @@ void chip_timer_event(void *user_data) {
 
   calc_hz_duty(chip);
 
-  if ((chip->sampleTimeUs != attr_read(chip->sampleTimeUs_attr)) ||
-      (chip->sampleMs != attr_read(chip->sampleTimeMs_attr))) {
-    chip->sampleTimeUs = attr_read(chip->sampleTimeUs_attr);
-    chip->sampleMs = attr_read(chip->sampleTimeMs_attr);
+if (chip->firstRun ||
+    (chip->sampleTimeUs != attr_read(chip->SampleTimeUs_attr)) ||
+    (chip->sampleMs != attr_read(chip->SampleTimeMs_attr))) {
+    chip->sampleTimeUs = attr_read(chip->SampleTimeUs_attr);
+    chip->sampleMs = attr_read(chip->SampleTimeMs_attr);
+    chip->triggerChannel = attr_read(chip->TriggerChannel_attr);
+    chip->triggerMode = attr_read(chip->TriggerMode_attr);
+
     if (chip->sampleTimeUs + chip->sampleMs < 10) chip->sampleTimeUs = 10;
     chip->samplePeriod = chip->sampleTimeUs + (chip->sampleMs * 1000);
     timer_start(chip->timer, chip->samplePeriod, true);
     chip->captureUs = (chip->fb_w - 2) * (chip->sampleTimeUs + (chip->sampleMs * 1000));
     chip->captureMs = chip->captureUs / 1000;
+    chip->firstRun = false;
   }
-  if (chip->triggerChannel != attr_read(chip->triggerChannel_attr)) chip->triggerChannel = attr_read(chip->triggerChannel_attr);
-  if (chip->triggerMode != attr_read(chip->triggerMode_attr)) chip->triggerMode = attr_read(chip->triggerMode_attr);
 
-  //chip->timerCount % (401 - chip->sampleTimeUs)
-  if (chip->timerCount % (255 * (401 - chip->sampleTimeUs)) == 0) draw_string(chip);
+  if (chip->triggerChannel != attr_read(chip->TriggerChannel_attr)) chip->triggerChannel = attr_read(chip->TriggerChannel_attr);
+  if (chip->triggerMode != attr_read(chip->TriggerMode_attr)) chip->triggerMode = attr_read(chip->TriggerMode_attr);
+
+  if (chip->sampleMs == 0 && chip->timerCount % (255 * (41 - (chip->sampleTimeUs / 10))) == 0) draw_string(chip);
+  else if (chip->sampleMs > 0) draw_string(chip);
+
   chip->timerCount++;
 }
 
@@ -439,7 +492,7 @@ void draw_string(chip_state_t *chip) {
     const uint8_t *bitmap = font8x8[ascii];
     for (int y = 0; y < 8; y++) {
       for (int x = 0; x < 8; x++) {
-        color = (bitmap[y] & (1 << (8 - x))) ? chip->white : chip->green;
+        color = (bitmap[y] & (1 << (8 - x))) ? chip->white : chip->chipGreen;
         buffer_write(chip->framebuffer, (chip->fb_w * 4 * (y + yy + chip->serial_y)) + ((x + 10 + chip->serial_x) * 4), &color, sizeof(color));
       }
     }
@@ -454,17 +507,21 @@ uint32_t draw_ch(chip_state_t *chip, uint32_t y_base, uint32_t y_height, float y
              (y < plot_y && y < py_val) ||
              (y > plot_y && y > py_val) ||
              (chip->plot_x == chip->fb_w - 1) ||
-             (chip->plot_x == 0)) ? chip->background : chip->green;
+             (chip->plot_x == 0)) ? chip->crt : chip->trace;
     buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + (chip->plot_x * 4), &color, sizeof(color));
-    if (chip->plot_x + 8 < chip->fb_w && chip->sampleMs) buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + ((chip->plot_x + 8) * 4), &chip->background, sizeof(color));
+    if (chip->plot_x + 8 < chip->fb_w && chip->sampleMs) buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + ((chip->plot_x + 8) * 4), &chip->crt, sizeof(color));
   }
   return plot_y;
 }
 
 void draw_plot(chip_state_t *chip) {
+  chip->trace = chip->trace0; 
   chip->plot_py0 = draw_ch(chip, 24, 20, (chip->countA0 > 0) ? chip->sample0 * 0.2 : chip->sample0, chip->plot_py0);
+  chip->trace = chip->trace1; 
   chip->plot_py1 = draw_ch(chip, 50, 20, (chip->countA1 > 0) ? chip->sample1 * 0.2 : chip->sample1, chip->plot_py1);
+  chip->trace = chip->trace2; 
   chip->plot_py2 = draw_ch(chip, 76, 20, (chip->countA2 > 0) ? chip->sample2 * 0.2 : chip->sample2, chip->plot_py2);
+  chip->trace = chip->trace3; 
   chip->plot_py3 = draw_ch(chip, 102, 20, (chip->countA3 > 0) ? chip->sample3 * 0.2 : chip->sample3, chip->plot_py3);
   chip->plot_x = (chip->plot_x + 1) % chip->fb_w;
 }
@@ -472,7 +529,7 @@ void draw_plot(chip_state_t *chip) {
 void fill_string(chip_state_t *chip) {
   for (int x = 0; x < chip->fb_w; x += 1) {
     for (int y = chip->fb_h - chip->serial_h; y < chip->fb_h; y += 1) {
-      buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + (x * 4), &chip->green, sizeof(chip->green));
+      buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + (x * 4), &chip->chipGreen, sizeof(chip->chipGreen));
     }
   }
 }
@@ -480,7 +537,7 @@ void fill_string(chip_state_t *chip) {
 void fill_plot(chip_state_t *chip) {
   for (int x = 0; x < chip->fb_w; x += 1) {
     for (int y = 0; y < chip->fb_h - chip->serial_h; y += 1) {
-      buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + (x * 4), &chip->background, sizeof(chip->background));
+      buffer_write(chip->framebuffer, (chip->fb_w * 4 * y) + (x * 4), &chip->crt, sizeof(chip->crt));
     }
   }
 }

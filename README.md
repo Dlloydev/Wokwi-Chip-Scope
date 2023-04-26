@@ -1,10 +1,14 @@
+
+
 # Wokwi-Chip-Scope
 
 ## Description
 
 This 4 channel scope chip allows you to graph four analog or digital signals as they vary over time.
 
-- Scope `Sample Time μs` range is 10µs to 10000 ms (default 100 µs).
+- Scope `Sample Time μs` range is 0µs to 400µs
+
+- Scope `Sample Time ms` range is 0ms to 40ms .
 
 - Width of plot is 250 samples.
 
@@ -24,18 +28,25 @@ This 4 channel scope chip allows you to graph four analog or digital signals as 
 
   ```json
         "attrs": {
-          "mySampleTimeUs": "100",
-          "mySampleTimeMs": "0",
-          "myTriggerChannel": "0",
-          "myTriggerMode": "1"
+          "sampleTimeUs": "100",
+          "sampleTimeMs": "0",
+          "triggerChannel": "0",
+          "triggerMode": "1",
+          "crtColor": "2",
+          "trace0Color": "14",
+          "trace1Color": "12",
+          "trace2Color": "10",
+          "trace3Color": "2"
         }
   ```
-
+  
+  
+  
   ![image](https://user-images.githubusercontent.com/63488701/225511219-88cb7d44-6541-4598-9401-b627d5cc918f.png)
 
 
 
-![image](https://user-images.githubusercontent.com/63488701/225989409-f13bb610-c9eb-4df7-a969-b8c1cd27d1c5.png)
+![image](https://user-images.githubusercontent.com/63488701/234473322-c44b2d9f-794e-46fb-bdab-0f83ac155ef2.png)
 
 | Name           | Description                                       |
 | -------------- | ------------------------------------------------- |
@@ -48,13 +59,39 @@ For digital signals, the frequency (Hz) and duty (%) is calculated for the selec
 
 In the image above, D0 is selected for trigger shown by `>`. The analog voltage for the slide pot is not shown, as it is adjusted to minimum (0V). The signal generator is connected to A3 and the sine wave is displayed, If this analog signal is adjusted to 0.0 volts, then the waveform on channel D3 will be shown.
 
+The colors available for `crtColor` are:
+
+0. black
+1. whiteGray
+2. darkGreen
+3. deepGreen
+4. darkBlue
+
+The colors available for `tracenColor` are:
+
+0. black
+1. brown
+2. red
+3. orange
+4. gold
+5. green
+6. blue
+7. violet
+8. gray
+9. white
+10. cyan
+11. limeGreen
+12. magenta
+13. purple
+14. yellow
+
 ## Usage
 
 To use this chip in your project, include it as a dependency in your `diagram.json` file:
 
 ```json
   "dependencies": {
-    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.4"
+    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.5"
   }
 ```
 
@@ -69,10 +106,15 @@ Then, add the chip to your circuit by adding a `chip-scope` item to the `parts` 
       "top": -100.0,
       "left": 100.0,
       "attrs": {
-        "mySampleTimeUs": "100",
-        "mySampleTimeMs": "0",
-        "myTriggerChannel": "0",
-        "myTriggerMode": "1"
+        "sampleTimeUs": "100",
+        "sampleTimeMs": "0",
+        "triggerChannel": "0",
+        "triggerMode": "1",
+        "crtColor": "2",
+        "trace0Color": "14",
+        "trace1Color": "12",
+        "trace2Color": "10",
+        "trace3Color": "2"
       }
     },
 ```
@@ -86,3 +128,4 @@ The actual source code for the chip lives in [src/main.c](https://github.com/Dll
 ## License
 
 This project is licensed under the MIT license. See the [LICENSE](https://github.com/Dlloydev/Wokwi-Chip-Scope/blob/main/LICENSE) file for more details.
+
