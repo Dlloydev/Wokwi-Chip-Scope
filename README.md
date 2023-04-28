@@ -32,7 +32,7 @@ This 4 channel scope chip allows you to graph four analog or digital signals as 
           "sampleTimeMs": "0",
           "triggerChannel": "0",
           "triggerMode": "1",
-          "crtColor": "2",
+          "crtColor": "0",
           "trace0Color": "14",
           "trace1Color": "12",
           "trace2Color": "10",
@@ -91,7 +91,7 @@ To use this chip in your project, include it as a dependency in your `diagram.js
 
 ```json
   "dependencies": {
-    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.6"
+    "chip-scope": "github:Dlloydev/Wokwi-Chip-scope@1.0.7"
   }
 ```
 
@@ -110,7 +110,7 @@ Then, add the chip to your circuit by adding a `chip-scope` item to the `parts` 
         "sampleTimeMs": "0",
         "triggerChannel": "0",
         "triggerMode": "1",
-        "crtColor": "2",
+        "crtColor": "0",
         "trace0Color": "14",
         "trace1Color": "12",
         "trace2Color": "10",

@@ -1,4 +1,4 @@
-// Scope Chip v1.0.6
+// Scope Chip v1.0.7
 // by David Lloyd, March 2023.
 
 #include "wokwi-api.h"
@@ -225,7 +225,7 @@ typedef struct {
   uint32_t plot_py2;
   uint32_t plot_y3;
   uint32_t plot_py3;
-  rgba_t crt, whiteGray, darkGreen, deepGreen, darkBlue, chipGreen;
+  rgba_t crt, txt, lightGray, whiteGray, darkGreen, deepGreen, darkBlue, chipGreen;
   rgba_t trace, trace0, trace1, trace2, trace3;
   rgba_t black, brown, red, orange, gold, green, blue, violet, gray, white, cyan, limeGreen, magenta, purple, yellow;
   timer_t timer;
@@ -255,6 +255,7 @@ void chip_init(void) {
 
   chip->black =     (rgba_t) {.r = 0x00, .g = 0x00, .b = 0x00, .a = 0xff};
   chip->whiteGray = (rgba_t) {.r = 0xf7, .g = 0xf7, .b = 0xf7, .a = 0xff};
+  chip->lightGray = (rgba_t) {.r = 0xb7, .g = 0xb7, .b = 0xb7, .a = 0xff};
   chip->chipGreen = (rgba_t) {.r = 0x08, .g = 0x7f, .b = 0x45, .a = 0xdf};
   chip->darkGreen = (rgba_t) {.r = 0x02, .g = 0x30, .b = 0x20, .a = 0xff};
   chip->deepGreen = (rgba_t) {.r = 0x29, .g = 0x52, .b = 0x40, .a = 0xff};
@@ -489,10 +490,11 @@ void draw_string(chip_state_t *chip) {
     chip->serial_x = (c % 26) * 9;
     ascii = (c < 26) ? serial_a[c % 26] : (c < 52) ? serial_b[c % 26] : (c < 78) ? serial_c[c % 26] : (c < 104) ? serial_d[c % 26] : serial_e[c % 26];
     yy = (c < 26) ? 1 : (c < 52) ? 12 : (c < 78) ? 23 : (c < 104) ? 34 : 45;
+    chip->txt = ((yy -1) / 11 == chip->triggerChannel + 1) ? chip->white : chip->lightGray;
     const uint8_t *bitmap = font8x8[ascii];
     for (int y = 0; y < 8; y++) {
       for (int x = 0; x < 8; x++) {
-        color = (bitmap[y] & (1 << (8 - x))) ? chip->white : chip->chipGreen;
+        color = (bitmap[y] & (1 << (8 - x))) ? chip->txt : chip->chipGreen;
         buffer_write(chip->framebuffer, (chip->fb_w * 4 * (y + yy + chip->serial_y)) + ((x + 10 + chip->serial_x) * 4), &color, sizeof(color));
       }
     }
